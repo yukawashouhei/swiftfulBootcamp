@@ -54,9 +54,22 @@ struct TabViewBootcampRefactored: View {
         appearance.stackedLayoutAppearance.normal.iconColor = UIColor(unselectedColor)
         appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(unselectedColor)]
 
+        // ★★★ 選択時の色の設定は Appearance では行わない ★★★
+        // (ここで設定すると .tint() による動的変更と競合する可能性があるため)
+        // appearance.stackedLayoutAppearance.selected.iconColor = ...
+        // appearance.stackedLayoutAppearance.selected.titleTextAttributes = ...
+
+
         // 設定した外観をデフォルト(standard)とスクロールエッジ(scrollEdge)に適用
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+
+    // ★★★ 現在選択されているタブの色を返す計算プロパティ ★★★
+    private var currentTintColor: Color {
+        // tabItems配列から、現在選択されているselectedTabと一致する要素を探す
+        // 見つかった要素のselectedColorを返す。見つからなければデフォルト色(例: 青)を返す
+        tabItems.first(where: { $0.tab == selectedTab })?.selectedColor ?? .accentColor // .accentColorはシステムのデフォルト色
     }
 
     var body: some View {
@@ -80,7 +93,8 @@ struct TabViewBootcampRefactored: View {
                 .tag(item.tab)
             }
         }
-        // TabView全体に .tint() を設定すると、各タブアイテムの色指定と競合する可能性があるため設定しない
+        // ★★★ TabView全体に .tint() を適用し、選択色を動的に変更 ★★★
+        .tint(currentTintColor)
     }
 
     // 5. タブアイテムのラベルを一貫して生成するためのヘルパー関数 (@ViewBuilderを使用)
@@ -89,8 +103,9 @@ struct TabViewBootcampRefactored: View {
         Label(item.title, systemImage: item.iconName)
             // 選択されているタブのアイコンのみ塗りつぶし(.fill)にする
             .environment(\.symbolVariants, selectedTab == item.tab ? .fill : .none)
-            // 選択状態に基づいて色を設定 (選択時は指定色、非選択時は黒)
-            .foregroundColor(selectedTab == item.tab ? item.selectedColor : unselectedColor)
+            // ★★★ ここでの .foregroundColor 設定は削除 ★★★
+            // (選択色は .tint() で制御するため)
+            // .foregroundColor(selectedTab == item.tab ? item.selectedColor : unselectedColor)
     }
 }
 
