@@ -1,94 +1,134 @@
 import SwiftUI
 
-struct TabViewbootcamp: View {
+// 1. 各タブを表すEnum (タイプセーフなタグとして使用)
+// CaseIterable: ForEachで全ケースを反復処理するため
+// Identifiable: ForEachで一意に識別するため
+enum Tab: Int, CaseIterable, Identifiable {
+    case home = 0
+    case browse = 1
+    case profile = 2
+    case setting = 3
 
-    @State private var selectedTab: Int = 0
-    let unselectedColor: Color = .black
-    let tabColors: [Color] = [.yellow, .red, .blue, .purple]
+    // Identifiableに準拠するためにidを定義 (ここではrawValueを使用)
+    var id: Int { self.rawValue }
+}
 
+// 2. タブに関するすべてのデータを保持する構造体
+struct TabInfo {
+    let tab: Tab            // 対応するタブのEnumケース
+    let title: String       // タブバーに表示するタイトル
+    let iconName: String    // タブバーに表示するSF Symbolsの名前 (非塗りつぶし版)
+    let selectedColor: Color // このタブが選択された時の色
+    let contentBgColor: Color // このタブのコンテンツエリアの背景色
+    let contentText: String   // このタブのコンテンツエリアに表示する主要テキスト
+}
+
+struct TabViewBootcampRefactored: View {
+
+    // 選択されているタブの状態を保持 (Enumを使用)
+    @State private var selectedTab: Tab = .home // 初期選択はホーム
+    // 非選択時のタブアイテムの色
+    private let unselectedColor: Color = .black
+    // コンテンツ下部に追加する白いバーの高さ
+    private let bottomBarHeight: CGFloat = 20
+
+    // 3. すべてのタブの設定データを一元管理する配列
+    private let tabItems: [TabInfo] = [
+        TabInfo(tab: .home, title: "Home", iconName: "house", selectedColor: .yellow, contentBgColor: .yellow.opacity(0.3), contentText: "HOME TAB"),
+        TabInfo(tab: .browse, title: "Browse", iconName: "globe", selectedColor: .red, contentBgColor: .red.opacity(0.3), contentText: "BROWSE TAB"),
+        TabInfo(tab: .profile, title: "Profile", iconName: "person", selectedColor: .blue, contentBgColor: .blue.opacity(0.3), contentText: "PROFILE TAB"),
+        TabInfo(tab: .setting, title: "Setting", iconName: "gearshape", selectedColor: .purple, contentBgColor: .purple.opacity(0.3), contentText: "SETTING TAB")
+    ]
+
+    // タブバーの外観を設定 (View構造体の初期化時に一度だけ実行される)
     init() {
         let appearance = UITabBarAppearance()
+        // 不透明な背景で設定を開始
         appearance.configureWithOpaqueBackground()
-
-        // 1. 背景色を白に変更
+        // 背景色を白に設定
         appearance.backgroundColor = UIColor.white
+        // タブバー上部の境界線(影)を削除
+        appearance.shadowColor = nil
 
-        // 2. タブバー上部の境界線（影）を削除
-        appearance.shadowColor = nil // または appearance.shadowImage = UIImage()
-
-        // 非選択時のアイテムの色を設定 (黒)
+        // 非選択時のアイテムの外観を設定 (定数を使用)
         appearance.stackedLayoutAppearance.normal.iconColor = UIColor(unselectedColor)
         appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(unselectedColor)]
 
-        // 外観を適用
+        // 設定した外観をデフォルト(standard)とスクロールエッジ(scrollEdge)に適用
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
 
     var body: some View {
+        // 選択状態をEnumとバインド
         TabView(selection: $selectedTab) {
-            TabContentView(text: "HOME TAB", bgColor: tabColors[0].opacity(0.3), currentTab: $selectedTab)
+            // 4. ForEachを使用してタブデータを反復処理し、繰り返しを削減
+            ForEach(tabItems, id: \.tab) { item in
+                // 各タブのコンテンツViewを生成
+                TabContentView(
+                    text: item.contentText,
+                    bgColor: item.contentBgColor,
+                    currentTab: selectedTab, // 選択中のタブ(Enum)を渡す
+                    bottomBarHeight: bottomBarHeight // 白いバーの高さを渡す
+                )
+                // 各コンテンツViewに対応するタブバーアイテムを設定
                 .tabItem {
-                    Label("Home", systemImage: "house")
-                        .environment(\.symbolVariants, selectedTab == 0 ? .fill : .none)
-                        .foregroundColor(selectedTab == 0 ? tabColors[0] : unselectedColor)
+                    // ヘルパー関数を呼び出してタブアイテムのラベルを生成
+                    tabItemLabel(for: item)
                 }
-                .tag(0)
-
-            TabContentView(text: "BROWSE TAB", bgColor: tabColors[1].opacity(0.3), currentTab: $selectedTab)
-                .tabItem {
-                    Label("Browse", systemImage: "globe")
-                         .environment(\.symbolVariants, selectedTab == 1 ? .fill : .none)
-                        .foregroundColor(selectedTab == 1 ? tabColors[1] : unselectedColor)
-                }
-                .tag(1)
-
-            TabContentView(text: "PROFILE TAB", bgColor: tabColors[2].opacity(0.3), currentTab: $selectedTab)
-                .tabItem {
-                    Label("Profile", systemImage: "person")
-                         .environment(\.symbolVariants, selectedTab == 2 ? .fill : .none)
-                        .foregroundColor(selectedTab == 2 ? tabColors[2] : unselectedColor)
-                }
-                .tag(2)
-
-            TabContentView(text: "SETTING TAB", bgColor: tabColors[3].opacity(0.3), currentTab: $selectedTab)
-                .tabItem {
-                    Label("Setting", systemImage: "gearshape")
-                         .environment(\.symbolVariants, selectedTab == 3 ? .fill : .none)
-                        .foregroundColor(selectedTab == 3 ? tabColors[3] : unselectedColor)
-                }
-                .tag(3)
+                // 各コンテンツViewにEnumケースをタグとして設定
+                .tag(item.tab)
+            }
         }
+        // TabView全体に .tint() を設定すると、各タブアイテムの色指定と競合する可能性があるため設定しない
+    }
+
+    // 5. タブアイテムのラベルを一貫して生成するためのヘルパー関数 (@ViewBuilderを使用)
+    @ViewBuilder
+    private func tabItemLabel(for item: TabInfo) -> some View {
+        Label(item.title, systemImage: item.iconName)
+            // 選択されているタブのアイコンのみ塗りつぶし(.fill)にする
+            .environment(\.symbolVariants, selectedTab == item.tab ? .fill : .none)
+            // 選択状態に基づいて色を設定 (選択時は指定色、非選択時は黒)
+            .foregroundColor(selectedTab == item.tab ? item.selectedColor : unselectedColor)
     }
 }
 
+// TabContentViewもEnumと高さ定数を受け入れるように更新
 struct TabContentView: View {
     let text: String
     let bgColor: Color
-    @Binding var currentTab: Int
+    let currentTab: Tab // Enumタイプを使用
+    let bottomBarHeight: CGFloat // 定数を使用
 
     var body: some View {
         ZStack(alignment: .bottom) {
+            // 背景色 (上端と左右はセーフエリアを無視)
             bgColor
                 .ignoresSafeArea(.all, edges: [.top, .horizontal])
 
+            // メインコンテンツ部分
             VStack {
-                Spacer()
+                Spacer() // 上下のSpacerで中央寄せ
                 Text(text).font(.headline)
-                Text("Selected Tab Tag: \(currentTab)")
+                // デバッグ用に現在のタブのrawValueを表示 (任意)
+                Text("Selected Tab: \(currentTab.rawValue)")
                 Spacer()
             }
+            //可能な限り最大のサイズを取り、コンテンツを下部の白いバーにかぶらないように底上げ
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(.bottom, 20)
+            .padding(.bottom, bottomBarHeight) // 定数を使用
 
+            // 下部の白いバー
             Rectangle()
                 .fill(.white)
                 .frame(maxWidth: .infinity)
-                .frame(height: 20)
+                .frame(height: bottomBarHeight) // 定数を使用
         }
     }
 }
 
 #Preview {
-    TabViewbootcamp()
+    // 新しい構造体名でプレビュー
+    TabViewBootcampRefactored()
 }
