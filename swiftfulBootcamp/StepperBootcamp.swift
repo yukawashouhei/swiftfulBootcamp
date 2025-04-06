@@ -22,9 +22,9 @@ struct StepperBootcamp: View {
             
             Stepper("Stepper 2") {
                 widthIncrement += 10
-                incrementWidth(amount: 10)
+                incrementWidth(amount: 50)
             } onDecrement: {
-                incrementWidth(amount: -10)
+                incrementWidth(amount: -50)
             }
             .padding(50)
         }
