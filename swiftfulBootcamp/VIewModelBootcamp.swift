@@ -13,7 +13,7 @@ struct FruitModel: Identifiable {
     let count: Int
 }
 
-struct VIewModelBootcamp: View {
+struct ViewModelBootcamp: View {
     
     @State var fruitArray: [FruitModel] = [
         FruitModel(name: "Apples", count: 5)
@@ -31,6 +31,7 @@ struct VIewModelBootcamp: View {
                             .bold()
                     }
                 }
+                .onDelete(perform: deleteFruit)
             }
             .listStyle(GroupedListStyle())
             .navigationTitle("Fruit List")
@@ -50,9 +51,12 @@ struct VIewModelBootcamp: View {
         fruitArray.append(fruit3)
         fruitArray.append(fruit4)
     }
+    func deleteFruit(index: IndexSet) {
+        fruitArray.remove(atOffsets: index)
+    }
 }
 
 
 #Preview {
-    VIewModelBootcamp()
+    ViewModelBootcamp()
 }
