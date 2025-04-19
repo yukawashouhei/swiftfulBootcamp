@@ -30,8 +30,12 @@ struct ModelBootcamp: View {
             List {
                 ForEach(users) { user in
                     HStack(spacing: 15.0) {
-                        Circle()
-                            .frame(width: 35, height: 35)
+                        Image(systemName: "person.crop.circle")
+                            .resizable() // サイズ変更可能にする
+                            .scaledToFit() // アスペクト比を保ってフレームに収める
+                            .frame(width: 35, height: 35) // サイズを指定
+                            .foregroundStyle(.gray) // 色を指定 (任意)
+                        
                         VStack(alignment: .leading) {
                             Text(user.displayName)
                                 .font(.headline)
@@ -40,6 +44,12 @@ struct ModelBootcamp: View {
                                 .font(.caption)
                         }
                         Spacer()
+                        
+                        if user.isVerified {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundStyle(.blue)
+                        }
+                        
                         VStack {
                             Text("\(user.followersCount)")
                                 .font(.headline)
