@@ -49,16 +49,31 @@ struct DetailView: View {
     var body: some View {
         ZStack {
             //background
-            Color.orange.ignoresSafeArea()
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0, green: 1, blue: 0.5, opacity: 1.0), // 色1
+                    Color(red: 0.2, green: 0.8, blue: 1.0, opacity: 0.9)  // 色2
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             
             //foreground
-            Text(selectedItem)
-                .font(.headline)
-                .foregroundStyle(.orange)
-                .padding()
-                .padding(.horizontal)
-                .background(Color.white)
-                .cornerRadius(20)
+            NavigationLink(
+                destination: FinalView(),
+                label: {
+                    Text(selectedItem)
+                        .font(.headline)
+                        .foregroundStyle(Gradient(colors: [
+                            Color(red: 0, green: 1, blue: 0.5, opacity: 1.0),
+                            Color(red: 0.2, green: 0.8, blue: 1.0, opacity: 0.9)
+                        ]))
+                        .padding()
+                        .padding(.horizontal)
+                        .background(Color.white)
+                        .cornerRadius(20)
+                })
         }
     }
 }
@@ -97,5 +112,5 @@ struct FinalView: View {
 #Preview {
     EnvironmentObjectBootcamp()
     //        DetailView(selectedItem: "iPhone")
-    FinalView()
+    //    FinalView()
 }
