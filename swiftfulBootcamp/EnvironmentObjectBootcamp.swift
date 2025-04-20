@@ -30,7 +30,7 @@ struct EnvironmentObjectBootcamp: View {
             List {
                 ForEach(viewModel.dataArray, id: \.self) { item in
                     NavigationLink(
-                        destination: DetailView(selectedItem: item),
+                        destination: DetailView(selectedItem: item, viewModel: viewModel),
                         label: {
                             Text(item)
                         })
@@ -45,6 +45,7 @@ struct EnvironmentObjectBootcamp: View {
 struct DetailView: View {
     
     let selectedItem: String
+    @ObservedObject var viewModel: EnvironmentViewModel
     
     var body: some View {
         ZStack {
@@ -61,7 +62,7 @@ struct DetailView: View {
             
             //foreground
             NavigationLink(
-                destination: FinalView(),
+                destination: FinalView(viewModel: viewModel),
                 label: {
                     Text(selectedItem)
                         .font(.headline)
@@ -80,6 +81,8 @@ struct DetailView: View {
 
 struct FinalView: View {
     
+    @ObservedObject var viewModel: EnvironmentViewModel
+    
     var body: some View {
         //background
         ZStack {
@@ -96,9 +99,8 @@ struct FinalView: View {
             ScrollView {
                 VStack(spacing:20)
                 {
-                    Text("Item1")
-                    Text("Item2")
-                    Text("Item3")
+                    ForEach(viewModel.dataArray, id: \.self) { item in
+                        Text(item)}
                 }
                 .foregroundStyle(.black)
                 .font(.title)
