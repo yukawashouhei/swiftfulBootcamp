@@ -42,7 +42,7 @@ class FruitViewModel:ObservableObject {
 
 struct ViewModelBootcamp: View {
     
-    @ObservedObject var fruitViewModel: FruitViewModel = FruitViewModel()
+    @StateObject var fruitViewModel: FruitViewModel = FruitViewModel()
     
     var body: some View {
         NavigationView {
