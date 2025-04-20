@@ -30,7 +30,7 @@ struct EnvironmentObjectBootcamp: View {
             List {
                 ForEach(viewModel.dataArray, id: \.self) { item in
                     NavigationLink(
-                        destination: DetailView(selectedItem: item, viewModel: viewModel),
+                        destination: DetailView(selectedItem: item),
                         label: {
                             Text(item)
                         })
@@ -39,13 +39,14 @@ struct EnvironmentObjectBootcamp: View {
             }
             .navigationTitle("iOS Devices")
         }
+        .environmentObject(viewModel)
     }
 }
 
 struct DetailView: View {
     
     let selectedItem: String
-    @ObservedObject var viewModel: EnvironmentViewModel
+    @EnvironmentObject var viewModel: EnvironmentViewModel
     
     var body: some View {
         ZStack {
@@ -62,7 +63,7 @@ struct DetailView: View {
             
             //foreground
             NavigationLink(
-                destination: FinalView(viewModel: viewModel),
+                destination: FinalView(),
                 label: {
                     Text(selectedItem)
                         .font(.headline)
@@ -81,7 +82,7 @@ struct DetailView: View {
 
 struct FinalView: View {
     
-    @ObservedObject var viewModel: EnvironmentViewModel
+    @EnvironmentObject var viewModel: EnvironmentViewModel
     
     var body: some View {
         //background
